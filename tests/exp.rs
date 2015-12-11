@@ -1,7 +1,7 @@
-extern crate rlibm;
+extern crate libm;
 
 #[test]
 fn test_import() {
     #![allow(unused)]
-    use rlibm::exp;
+    use libm::exp;
 }

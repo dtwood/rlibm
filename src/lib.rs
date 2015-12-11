@@ -1,3 +1,3 @@
 mod generic;
 
-pub use generic::e_exp::e_exp;
+pub use generic::exp::exp;
