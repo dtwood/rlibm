@@ -1,5 +1,13 @@
 use super::utils::{Transmute};
 
+macro_rules! p {
+    ($x: expr) => { {
+        let x = $x;
+        println!("{:?}", $x);
+        x
+    } }
+}
+
 macro_rules! assert_approx_eq {
     ($left: expr, $right: expr) => { {
         let left = $left;
@@ -40,87 +48,98 @@ const TWOP1023: f64 = 8988465674311579538646525953945123668089884894711532863671
 
 
 pub fn exp(x: f64) -> f64 {
-    let y: f64;
-    let hi: f64;
-    let lo: f64;
-    let c: f64;
-
-    let k: i32;
-
-    let xsb = (x.high_u32() >> 31) == 1;
-    let hx = x.high_u32() & 0x7fffffff;
-
-    let mut x = x;
-
-    if hx >= 0x40862E42 { // |x| >= 709.78...
-        if hx >= 0x7ff00000 {
-            let lx: u32 = x.low_u32();
-            if ((hx & 0x000fffff) | lx) != 0 {
-                return x + x; // NaN
-            } else {
-                return if xsb { 0.0 } else { x }; // exp(+-inf) = (inf, 0)
-            }
+    if x.is_nan() {
+        return x + x;
+    }
+    if x.is_infinite() {
+        if x.is_sign_positive() {
+            return x;
+        } else {
+            return 0.0;
         }
+    }
 
-        if x > O_THRESHOLD {
-            return HUGE * HUGE;
-        }
-        if x < U_THRESHOLD {
-            return TWOM1000 * TWOM1000;
-        }
+    if x > O_THRESHOLD {
+        return HUGE * HUGE;
+    }
+    if x < U_THRESHOLD {
+        return TWOM1000 * TWOM1000;
     }
 
     if x == 1.0 {
         return 2.718281828459045235360;
     }
 
-    if hx > 0x3fd62e42 { // |x| > 0.5 ln2
-        if hx < 0x3ff0a2b2 { // |x| < 1.5 ln2
-            hi = x - LN2HI[xsb as usize];
-            lo = LN2LO[xsb as usize];
-            k = if xsb { -1 } else { 1 };
+    let k: i32;
+    let hi: f64;
+    let lo: f64;
+
+    let xsign = x.is_sign_positive();
+
+    if x.abs() > 0.5 * 2.0f64.ln() {
+        if x.abs() < 1.5 * 2.0f64.ln() {
+            k = if xsign { -1 } else { 1 };
+            if k == 0 {
+                panic!();
+            }
+            hi = x - LN2HI[xsign as usize];
+            lo = LN2LO[xsign as usize];
+            let x = hi - lo;
+            let t = x * x;
+            let c = x - t * (POLY1 + t * (POLY2 * t * (POLY3 * t * (POLY4 * t * POLY5))));
+
+            let y = ONE - ((lo - (x * c) / (2.0 - c)) - hi);
+
+            let twopk = f64::from_u32s(
+                    (0x3ff00000 + ((if p!(k >= -1021) { k } else { k + 1000 } as u32) << 20),
+                    0 as u32)
+                );
+            return y * twopk * TWOM1000;
         } else {
-            k = (INVLN2 * x + HALF[xsb as usize]) as i32;
+            k = (INVLN2 * x + HALF[xsign as usize]) as i32;
+            if k == 0 {
+                panic!();
+            }
             let t = k as f64;
+
             hi = x - t * LN2HI[0];
             lo = t * LN2LO[0];
+
+            let x_new = hi - lo;
+
+            let t = x_new * x_new;
+            let c = x_new - t * (POLY1 + t * (POLY2 * t * (POLY3 * t * (POLY4 * t * POLY5))));
+
+            let y = ONE - ((lo - (x_new * c) / (2.0 - c)) - hi);
+
+            let twopk = f64::from_u32s(
+                    (0x3ff00000 + ((if p!(k >= -1021) { k } else { k + 1000 } as u32) << 20),
+                    0 as u32)
+                );
+
+            if k >= -1021 {
+                if k == 1024 {
+                    return y * 2.0 * TWOP1023;
+                }
+                return y * twopk;
+            } else {
+                return y * twopk * TWOM1000;
+            }
         }
-        x = hi - lo;
-    } else if hx < 0x3e300000 {
+    }
+
+
+    if x.exponent() < 0x3e3 {
         if HUGE + x > ONE {
             return ONE + x;
+        } else {
+            panic!();
         }
-        k = 0xDEADBEEF;
-        hi = 0xDEADBEEF as f64;
-        lo = 0xDEADBEEF as f64;
-    } else {
-        k = 0;
-        hi = 0xDEADBEEF as f64;
-        lo = 0xDEADBEEF as f64;
     }
 
     let t = x * x;
-    let twopk = f64::from_u32s(
-            (0x3ff00000 + ((if k >= -1021 { k } else { k + 1000 } as u32) << 20),
-            0 as u32)
-        );
-
-    c = x - t * (POLY1 + t * (POLY2 * t * (POLY3 * t * (POLY4 * t * POLY5))));
-
-    if k == 0 {
-        return ONE - ((x * c) / (c - 2.0) - x);
-    } else {
-        y = ONE - ((lo - (x * c) / (2.0 - c)) - hi);
-    }
-
-    if k >= -1021 {
-        if k == 1024 {
-            return y * 2.0 * TWOP1023;
-        }
-        return y * twopk;
-    } else {
-        return y * twopk * TWOM1000;
-    }
+    let c = x - t * (POLY1 + t * (POLY2 * t * (POLY3 * t * (POLY4 * t * POLY5))));
+    return ONE - ((x * c) / (c - 2.0) - x);
 }
 
 #[cfg(test)]
@@ -142,14 +161,20 @@ mod tests {
     #[test]
     fn test_larger() {
         for i in 0..10 {
-            println!("{}", i);
             assert_approx_eq!(super::exp(i as f64), E_APPROX.powi(i));
         }
     }
 
     #[test]
+    fn test_giant() {
+        for i in -100..100 {
+            assert_approx_eq!(super::exp((i * 1000) as f64), E_APPROX.powi(i * 1000));
+        }
+    }
+
+    #[test]
     fn test_f64_max() {
-        assert_approx_eq!(super::exp(f64::MAX), f64::INFINITY);
+        assert_eq!(super::exp(f64::MAX), f64::INFINITY);
     }
 
     #[test]
@@ -164,11 +189,11 @@ mod tests {
 
     #[test]
     fn test_plus_inf() {
-        assert_approx_eq!(super::exp(f64::INFINITY), f64::INFINITY);
+        assert_eq!(super::exp(f64::INFINITY), f64::INFINITY);
     }
 
     #[test]
     fn test_neg_inf() {
-        assert_approx_eq!(super::exp(-f64::INFINITY), 0.0);
+        assert_eq!(super::exp(-f64::INFINITY), 0.0);
     }
 }
