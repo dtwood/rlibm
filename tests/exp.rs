@@ -1,7 +1,5 @@
 extern crate libm;
 
-#[test]
-fn test_import() {
-    #![allow(unused)]
-    use libm::exp;
-}
+use libm::exp;
+
+include!("../unit_tests/exp.rsi");

@@ -1,0 +1,67 @@
+macro_rules! assert_approx_eq {
+    ($left: expr, $right: expr) => { {
+        let left = $left;
+        let right = $right;
+        if !(left * 0.999 <= right) {
+            panic!("assertion failed: `(left ≈≈ right)` (left: `{:?}`, right: `{:?}`)",
+                left, right);
+        }
+        if !(right * 0.999 <= left) {
+            panic!("assertion failed: `(left ≈≈ right)` (left: `{:?}`, right: `{:?}`)",
+                left, right);
+        }
+    } }
+}
+
+use std::f64;
+
+#[test]
+fn test_zero() {
+    assert_approx_eq!(sqrt(0.0), 0.0);
+}
+
+#[test]
+fn test_one() {
+    assert_approx_eq!(sqrt(1.0), 1.0);
+}
+
+#[test]
+fn test_larger() {
+    for i in 0..100 {
+        let i = i as f64;
+        assert_approx_eq!(sqrt(i * i), i);
+    }
+}
+
+#[test]
+fn test_giant() {
+    for i in 0..100 {
+        let i = (i * 1000) as f64;
+        assert_approx_eq!(sqrt(i * i), i);
+    }
+}
+
+#[test]
+fn test_f64_max() {
+    assert!(sqrt(f64::MAX) > 0.0);
+}
+
+#[test]
+fn test_f64_min() {
+    assert!(sqrt(f64::MIN).is_nan());
+}
+
+#[test]
+fn test_nan() {
+    assert!(sqrt(f64::NAN).is_nan());
+}
+
+#[test]
+fn test_plus_inf() {
+    assert_eq!(sqrt(f64::INFINITY), f64::INFINITY);
+}
+
+#[test]
+fn test_neg_inf() {
+    assert!(sqrt(-f64::INFINITY).is_nan());
+}

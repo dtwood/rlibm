@@ -144,56 +144,7 @@ pub fn exp(x: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    use std::f64;
+    use super::exp;
 
-    const E_APPROX: f64 = 2.718281828459045;
-
-    #[test]
-    fn test_zero() {
-        assert_approx_eq!(super::exp(0.0), 1.0);
-    }
-
-    #[test]
-    fn test_one() {
-        assert_approx_eq!(super::exp(1.0), E_APPROX);
-    }
-
-    #[test]
-    fn test_larger() {
-        for i in 0..10 {
-            assert_approx_eq!(super::exp(i as f64), E_APPROX.powi(i));
-        }
-    }
-
-    #[test]
-    fn test_giant() {
-        for i in -100..100 {
-            assert_approx_eq!(super::exp((i * 1000) as f64), E_APPROX.powi(i * 1000));
-        }
-    }
-
-    #[test]
-    fn test_f64_max() {
-        assert_eq!(super::exp(f64::MAX), f64::INFINITY);
-    }
-
-    #[test]
-    fn test_f64_min() {
-        assert_eq!(super::exp(f64::MIN), 0.0);
-    }
-
-    #[test]
-    fn test_nan() {
-        assert!(super::exp(f64::NAN).is_nan());
-    }
-
-    #[test]
-    fn test_plus_inf() {
-        assert_eq!(super::exp(f64::INFINITY), f64::INFINITY);
-    }
-
-    #[test]
-    fn test_neg_inf() {
-        assert_eq!(super::exp(-f64::INFINITY), 0.0);
-    }
+    include!("../../unit_tests/exp.rsi");
 }
