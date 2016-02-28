@@ -1,7 +1,8 @@
 #![feature(asm)]
+#![feature(cfg_target_feature)]
 
-mod amd64;
+#[cfg(target_arch="x86_64")] mod x86_64;
 mod generic;
 
 pub use generic::exp::exp;
-pub use amd64::sqrt::sqrt;
+#[cfg(all(target_arch="x86_64", target_feature="sse"))] pub use x86_64::sse::sqrt::sqrt;
