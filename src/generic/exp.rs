@@ -79,9 +79,6 @@ pub fn exp(x: f64) -> f64 {
     if x.abs() > 0.5 * 2.0f64.ln() {
         if x.abs() < 1.5 * 2.0f64.ln() {
             k = if xsign { -1 } else { 1 };
-            if k == 0 {
-                panic!();
-            }
             hi = x - LN2HI[xsign as usize];
             lo = LN2LO[xsign as usize];
             let x = hi - lo;
