@@ -6,6 +6,7 @@ pub trait Transmute {
     fn all(self) -> u64;
     fn high_u32(self) -> u32;
     fn low_u32(self) -> u32;
+    fn to_u32s(self) -> Self::U32TUPLE;
     fn from_u64(u64) -> f64;
     fn from_u32s(Self::U32TUPLE) -> f64;
 
@@ -26,6 +27,10 @@ impl Transmute for f64 {
 
     fn low_u32(self) -> u32 {
         (self.all() & 0xFF) as u32
+    }
+
+    fn to_u32s(self) -> Self::U32TUPLE {
+        (self.high_u32(), self.low_u32())
     }
 
     fn from_u64(x: u64) -> Self {
