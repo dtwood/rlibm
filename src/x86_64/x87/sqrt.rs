@@ -1,12 +1,14 @@
+#[allow(dead_code)]
 pub fn sqrt(x: f64) -> f64 {
     let output: f64;
-    unsafe { asm!(
+    unsafe {
+        asm!(
         "fsqrt" :
         "={st}" (output) /* output */ :
         "{st}" (x) /* input */ :
         /* clobbers */ :
         "intel" /* options */ :
-        ); }
+        );    }
     return output;
 }
 

@@ -1,4 +1,4 @@
-use super::utils::{Transmute};
+use super::utils::Transmute;
 
 macro_rules! p {
     ($x: expr) => { {
@@ -24,18 +24,14 @@ macro_rules! assert_approx_eq {
 }
 
 const ONE: f64 = 1.0;
-const HALF: [f64; 2] = [0.5,-0.5];
+const HALF: [f64; 2] = [0.5, -0.5];
 const HUGE: f64 = 1.0e+300;
 const O_THRESHOLD: f64 = 7.09782712893383973096e+02; // 0x40862E42, 0xFEFA39EF
 const U_THRESHOLD: f64 = -7.45133219101941108420e+02; // 0xc0874910, 0xD52D3051
-const LN2HI: [f64; 2] = [
-    6.93147180369123816490e-01, // 0x3fe62e42, 0xfee00000
-    -6.93147180369123816490e-01, // 0xbfe62e42, 0xfee00000
-];
-const LN2LO: [f64; 2] = [
-    1.90821492927058770002e-10, // 0x3dea39ef, 0x35793c76
-    -1.90821492927058770002e-10, // 0xbdea39ef, 0x35793c76
-];
+const LN2HI: [f64; 2] = [6.93147180369123816490e-01, // 0x3fe62e42, 0xfee00000
+                         -6.93147180369123816490e-01 /* 0xbfe62e42, 0xfee00000 */];
+const LN2LO: [f64; 2] = [1.90821492927058770002e-10, // 0x3dea39ef, 0x35793c76
+                         -1.90821492927058770002e-10 /* 0xbdea39ef, 0x35793c76 */];
 const INVLN2: f64 = 1.44269504088896338700e+00; // 0x3ff71547, 0x652b82fe
 const POLY1: f64 = 1.66666666666666019037e-01; // 0x3FC55555, 0x5555553E
 const POLY2: f64 = -2.77777777770155933842e-03; // 0xBF66C16C, 0x16BEBD93
@@ -78,7 +74,11 @@ pub fn exp(x: f64) -> f64 {
 
     if x.abs() > 0.5 * 2.0f64.ln() {
         if x.abs() < 1.5 * 2.0f64.ln() {
-            k = if xsign { -1 } else { 1 };
+            k = if xsign {
+                -1
+            } else {
+                1
+            };
             hi = x - LN2HI[xsign as usize];
             lo = LN2LO[xsign as usize];
             let x = hi - lo;
