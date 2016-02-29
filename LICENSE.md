@@ -13,7 +13,7 @@ msun, as part of the Julia project is covered under the MIT license.
 
 ## Parts copyrighted by David T. Wood (ISC License)
 
->       Copyright (c) 2015 David T. Wood <devel@dtwood.uk>
+>       Copyright (c) 2015-16 David T. Wood <devel@dtwood.uk>
 >
 >       Permission to use, copy, modify, and/or distribute this software for
 >       any purpose with or without fee is hereby granted, provided that the
