@@ -88,7 +88,7 @@ pub fn exp(x: f64) -> f64 {
             let y = ONE - ((lo - (x * c) / (2.0 - c)) - hi);
 
             let twopk = f64::from_u32s(
-                    (0x3ff00000 + ((if p!(k >= -1021) { k } else { k + 1000 } as u32) << 20),
+                    (0x3ff00000 + ((if k >= -1021 { k } else { k + 1000 } as u32) << 20),
                     0 as u32)
                 );
             return y * twopk * TWOM1000;
@@ -110,7 +110,7 @@ pub fn exp(x: f64) -> f64 {
             let y = ONE - ((lo - (x_new * c) / (2.0 - c)) - hi);
 
             let twopk = f64::from_u32s(
-                    (0x3ff00000 + ((if p!(k >= -1021) { k } else { k + 1000 } as u32) << 20),
+                    (0x3ff00000 + ((if k >= -1021 { k } else { k + 1000 } as u32) << 20),
                     0 as u32)
                 );
 

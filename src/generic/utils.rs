@@ -39,7 +39,7 @@ impl Transmute for f64 {
 
     fn from_u32s(xs: Self::U32TUPLE) -> Self {
         let (hi, lo) = xs;
-        Self::from_u64((hi as u64) << 32 + (lo as u64))
+        Self::from_u64(((hi as u64) << 32) + (lo as u64))
     }
 
     fn exponent(self) -> u16 {

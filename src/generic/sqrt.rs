@@ -88,7 +88,7 @@ pub fn sqrt(x: f64) -> f64 {
     let mut s1: u32 = 0;
     let mut q: u32 = 0;
     // q = q1 = s0 = s1 = 0;    // /* [q,q1] = sqrt(x) */
-    let mut r = 0x00200000;    //     // /* r = moving bit from right to left */
+    let mut r: u32 = 0x00200000;    //     // /* r = moving bit from right to left */
 
     while r != 0 {
         let t = s0 + r;
@@ -104,13 +104,13 @@ pub fn sqrt(x: f64) -> f64 {
 
     r = sign;
     let mut t1: u32;
-    let mut t;
-    let mut q1 = 0;
+    let mut t: u32;
+    let mut q1: u32 = 0;
     while r != 0 {
         t1 = s1 + r;
         t = s0;
         if (t < ix0) || ((t == ix0) && (t1 <= ix1)) {
-            s1 = t1 + r;
+            s1 = t1.wrapping_add(r);
             if (t1 & sign == sign) && (s1 & sign == 0) {
                 s0 += 1
             };
@@ -118,11 +118,11 @@ pub fn sqrt(x: f64) -> f64 {
             if ix1 < t1 {
                 ix0 -= 1
             };
-            ix1 -= t1;
-            q1 += r;
+            ix1 = ix1.wrapping_sub(t1);
+            q1 = q1.wrapping_add(r);
         }
         ix0 += ix0 + ((ix1 & sign) >> 31);
-        ix1 += ix1;
+        ix1 = ix1.wrapping_add(ix1);
         r >>= 1;
     }
 
